@@ -1,13 +1,16 @@
 {
   inputs = {
-    cargo2nix.url = "github:cargo2nix/cargo2nix/release-0.11.0";
-    flake-utils.follows = "cargo2nix/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
-    nixpkgs.follows = "cargo2nix/nixpkgs";
+    cargo2nix = {
+      url = "github:cargo2nix/cargo2nix/release-0.11.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    flake-utils.follows = "cargo2nix/flake-utils";
   };
 
   outputs = inputs: with inputs;
@@ -35,6 +38,16 @@
         };
 
         packages = {
+          bintool = (rustPkgs.workspace.bintool {});
+          default = packages.bintool;
+
+          container = pkgs.dockerTools.buildImage {
+            name = "bintool";
+            tag = packages.bintool.version;
+            created = "now";
+            copyToRoot = packages.bintool;
+            config.Cmd = [ "${packages.bintool}/bin/bintool" ];
+          };
         };
       }
     );

@@ -1,0 +1,12 @@
+app = "bintool"
+
+[build]
+image = "bintool:0.1.0"
+
+[[services]]
+internal_port = 3000
+protocol = "tcp"
+
+[[services.ports]]
+handlers = ["http", "proxy_proto"]
+port = 80
